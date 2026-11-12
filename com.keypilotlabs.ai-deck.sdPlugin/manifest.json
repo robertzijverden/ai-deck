@@ -1,6 +1,6 @@
 {
   "Name": "AI Deck",
-  "Version": "0.1.0.0",
+  "Version": "0.1.0.1",
   "Author": "KeyPilot Labs",
   "UUID": "com.keypilotlabs.ai-deck",
   "Category": "AI Deck",
@@ -26,7 +26,7 @@
     {
       "Name": "Verbruik",
       "UUID": "com.keypilotlabs.ai-deck.usage",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Bekijk ondersteund verbruik in je eigen stijl.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -38,14 +38,12 @@
           "Image": "imgs/usage",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     },
     {
       "Name": "Open AI",
       "UUID": "com.keypilotlabs.ai-deck.open",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Open de geïnstalleerde app of website.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -57,14 +55,12 @@
           "Image": "imgs/open",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     },
     {
       "Name": "Sluit AI",
       "UUID": "com.keypilotlabs.ai-deck.close",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Sluit het venster van een eigen desktopapp.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -76,14 +72,12 @@
           "Image": "imgs/close",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     },
     {
       "Name": "Open / lang indrukken sluit",
       "UUID": "com.keypilotlabs.ai-deck.toggle",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Kort indrukken opent; lang indrukken sluit de desktopapp.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -95,15 +89,12 @@
           "Image": "imgs/toggle",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues",
-      "SupportedInKeyLogicActions": false
+      ]
     },
     {
       "Name": "Nieuwe chat",
       "UUID": "com.keypilotlabs.ai-deck.newchat",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Open de startpagina voor een gesprek.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -115,14 +106,12 @@
           "Image": "imgs/newchat",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     },
     {
       "Name": "Kopieer prompt",
       "UUID": "com.keypilotlabs.ai-deck.prompt",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Kopieer je opgeslagen prompt naar het klembord.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -134,14 +123,12 @@
           "Image": "imgs/prompt",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     },
     {
       "Name": "Verbruikspagina",
       "UUID": "com.keypilotlabs.ai-deck.dashboard",
-      "Icon": "imgs/action",
+      "Icon": "imgs/category",
       "Tooltip": "Open de dienst om limieten en accountinformatie te bekijken.",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -153,9 +140,7 @@
           "Image": "imgs/dashboard",
           "ShowTitle": false
         }
-      ],
-      "UserTitleEnabled": false,
-      "SupportURL": "https://github.com/robertzijverden/ai-deck/issues"
+      ]
     }
   ]
 }

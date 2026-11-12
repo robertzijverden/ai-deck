@@ -33,7 +33,15 @@ var AiDeck = (function (exports) {
     /** Existing brand artwork; colors are changed only for the user's monochrome theme. */
     function glyph(id, ink, variant = 'mono') {
         const artwork = logos[id][variant === 'brand' ? 'color' : variant === 'wordmark' ? 'wordmark' : 'mono'];
-        return artwork.replace(/<svg[^>]*>/, tag => tag.replace(/width="[^"]*"/, 'width="96"').replace(/height="[^"]*"/, 'height="96"').replace('<svg', '<svg x="24" y="24"')).replaceAll('currentColor', ink);
+        // Stream Deck's SVG renderer does not reliably display nested SVG viewports.
+        // Preserve the source paths and presentation attributes in a scaled group.
+        const root = artwork.match(/<svg([^>]*)>/);
+        const box = root[1].match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
+        const scale = 96 / Math.max(box[2], box[3]);
+        const x = 24 + (96 - box[2] * scale) / 2;
+        const y = 24 + (96 - box[3] * scale) / 2;
+        const attrs = root[1].replace(/\s(?:width|height|viewBox|xmlns|style)="[^"]*"/g, '');
+        return `<g transform="translate(${x} ${y}) scale(${scale}) translate(${-box[0]} ${-box[1]})"${attrs}>${artwork.slice(root[0].length).replace(/<\/svg>\s*$/, '')}</g>`.replaceAll('currentColor', ink);
     }
     function render(s, action, meter) {
         const p = palette(s);
