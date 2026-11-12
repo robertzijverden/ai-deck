@@ -1,0 +1,3 @@
+import http from 'node:http';import fs from 'node:fs';import path from 'node:path';
+const root=path.resolve('com.keypilotlabs.ai-deck.sdPlugin/ui');
+http.createServer((req,res)=>{const name=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.resolve(root,'.'+(name==='/'?'/settings.html':name));if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}try{res.setHeader('Content-Type',file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8');res.end(fs.readFileSync(file));}catch{res.writeHead(404);res.end();}}).listen(8765,'127.0.0.1',()=>console.log('Preview on http://127.0.0.1:8765'));

@@ -1,0 +1,21 @@
+{
+	"extends": "@tsconfig/node20/tsconfig.json",
+	"compilerOptions": {
+		"customConditions": [
+			"node"
+		],
+		"module": "ES2022",
+		"moduleResolution": "Bundler",
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noImplicitOverride": true
+	},
+	"include": [
+		"src/**/*.ts",
+		"tests/**/*.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

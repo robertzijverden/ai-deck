@@ -1,0 +1,3 @@
+Usage connectors, normalization and caching derived from Sing3Rous/stream-deck-ai-limits. Copyright 2026 David Utyuganov. MIT license included.
+AI Deck UI and controls: KeyPilot Labs.
+Brand SVG artwork: LobeHub lobe-icons, MIT, copyright 2023 LobeHub. Source: https://github.com/lobehub/lobe-icons. Brand names and logos remain the trademarks of their owners; no affiliation is implied.

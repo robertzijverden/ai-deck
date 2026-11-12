@@ -1,0 +1,52 @@
+{
+  "name": "keypilotlabs-ai-deck",
+  "version": "0.1.0",
+  "description": "Customizable AI controls and experimental usage meters. Windows beta.",
+  "keywords": [
+    "stream-deck",
+    "elgato",
+    "claude",
+    "claude-code",
+    "codex",
+    "copilot",
+    "github-copilot",
+    "usage",
+    "rate-limit"
+  ],
+  "homepage": "https://github.com/robertzijverden/ai-deck",
+  "bugs": {
+    "url": "https://github.com/robertzijverden/ai-deck/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/robertzijverden/ai-deck.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/prepare-deck.mjs && node scripts/import-logos.mjs && rollup -c deck.rollup.mjs && node scripts/build-assets.mjs",
+    "watch": "rollup -c deck.rollup.mjs -w",
+    "test": "node --experimental-strip-types --test \"tests/**/*.test.ts\"",
+    "lint:tsc": "tsc --noEmit",
+    "pack": "streamdeck pack com.keypilotlabs.ai-deck.sdPlugin --output dist",
+    "test:integration": "node scripts/integration.mjs",
+    "preview": "node scripts/preview-server.mjs"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@elgato/cli": "^1.7.4",
+    "@lobehub/icons-static-svg": "^1.102.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^15.2.2",
+    "@rollup/plugin-terser": "^1.0.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "@tsconfig/node20": "^20.1.2",
+    "@types/node": "~24.1.0",
+    "rollup": "^4.0.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^2.0.0"
+  }
+}

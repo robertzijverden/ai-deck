@@ -1,0 +1,27 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';import { spawn } from 'node:child_process';import path from 'node:path';import assert from 'node:assert/strict';
+const require=createRequire(fs.realpathSync('node_modules/@elgato/streamdeck/package.json'));
+const {WebSocketServer}=require('ws');
+const server=new WebSocketServer({port:0,host:'127.0.0.1'});await new Promise(r=>server.once('listening',r));
+const info={application:{version:'7.1.0',platform:'windows',platformVersion:'10',language:'en',font:'Arial'},plugin:{uuid:'com.keypilotlabs.ai-deck',version:'0.1.0.0'},devices:[{id:'test-device',name:'Test Deck',type:0,size:{rows:3,columns:5}}],colors:{}};
+const child=spawn(process.execPath,['bin/plugin.js','-port',String(server.address().port),'-pluginUUID','test-plugin','-registerEvent','registerPlugin','-info',JSON.stringify(info)],{cwd:path.resolve('com.keypilotlabs.ai-deck.sdPlugin'),stdio:'pipe',windowsHide:true});
+let stderr='';child.stderr.on('data',d=>stderr+=d);const watchdog=setTimeout(()=>{console.error('Protocol test timeout',stderr);child.kill();server.close();process.exit(1);},12000);
+try{
+const ws=await new Promise(r=>server.once('connection',r));const messages=[];ws.on('message',d=>messages.push(JSON.parse(d)));
+const wait=async(predicate)=>{for(let i=0;i<100;i++){const found=messages.find(predicate);if(found)return found;await new Promise(r=>setTimeout(r,30));}throw Error('Expected message not received: '+stderr);};
+await wait(m=>m.event==='registerPlugin');
+const settings={service:'claude',source:'manual',manualPercent:57,manualWeekly:18};
+const event=(event,context,action,settings)=>ws.send(JSON.stringify({event,context,action:'com.keypilotlabs.ai-deck.'+action,device:'test-device',payload:{controller:'Keypad',coordinates:{row:0,column:0},settings,state:0,isInMultiAction:false}}));
+event('willAppear','usage-key','usage',settings);
+const first=await wait(m=>m.event==='setImage'&&m.context==='usage-key'&&Buffer.from(m.payload.image.split(',')[1],'base64').toString().includes('57%'));
+assert.ok(first);messages.length=0;
+event('didReceiveSettings','usage-key','usage',{...settings,fill:'#ff00ff',layout:'ring'});
+await wait(m=>m.event==='setImage'&&Buffer.from(m.payload.image.split(',')[1],'base64').toString().includes('#ff00ff'));
+event('willAppear','chat-key','newchat',{service:'gemini'});event('keyDown','chat-key','newchat',{service:'gemini'});
+await wait(m=>m.event==='openUrl'&&m.payload.url==='https://gemini.google.com/app');
+event('willAppear','unsupported','usage',{service:'grok',enabled:true});
+await wait(m=>m.event==='setImage'&&m.context==='unsupported'&&Buffer.from(m.payload.image.split(',')[1],'base64').toString().includes('Niet beschikbaar'));
+event('willDisappear','usage-key','usage',settings);
+console.log('PASS: registration, manual meter, settings redraw, new-chat action, unsupported-provider state, disappearance. No real credentials or browser actions used.');
+ws.close();
+}finally{clearTimeout(watchdog);child.kill();for(const client of server.clients)client.terminate();await new Promise(r=>server.close(r));}

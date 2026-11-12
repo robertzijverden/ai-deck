@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+
+dist/
+*.streamDeckPlugin
+
+# Stream Deck files
+*.sdPlugin/bin
+*.sdPlugin/logs
+
+# Environment
+.env
+.env.*
+
+# Secrets / credentials — must never be committed
+.credentials.json
+**/.credentials.json
+auth.json
+**/auth.json
+*.pem
+*.key
