@@ -13,7 +13,7 @@ export async function getMeter(s: Settings, force=false): Promise<Meter> {
   let provider=providers.get(id);
   if(!provider) {
     // Account is the current official CLI login. Theme, thresholds and timers never split the cache.
-    const options={cache:new UsageCache({provider:id as UsageProvider,ttlMs:300000,forceMinIntervalMs:60000})};
+    const options={cache:new UsageCache({provider:id as UsageProvider,ttlMs:300000,forceMinIntervalMs:0})};
     provider=id==='claude'?new ClaudeProvider(options):id==='codex'?new CodexProvider(options):new CopilotProvider(options);
     providers.set(id,provider);
   }

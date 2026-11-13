@@ -11,6 +11,18 @@ import {
 import { rateLimited, genericError } from "../src/utils/errors.ts";
 import type { UsageSnapshot } from "../src/providers/types.ts";
 
+test('five-minute cache allows every explicit refresh while retaining automatic caching', async()=>{
+ let now=1000000, calls=0;
+ const cache=new UsageCache({provider:'codex',ttlMs:300000,forceMinIntervalMs:0,now:()=>now});
+ const fetcher=async()=>{calls++;return okSnapshot();};
+ await cache.get(fetcher);
+ now+=1000;await cache.get(fetcher);assert.equal(calls,1);
+ await cache.get(fetcher,{force:true});assert.equal(calls,2);
+ now+=1000;await cache.get(fetcher,{force:true});assert.equal(calls,3);
+ now+=299999;await cache.get(fetcher);assert.equal(calls,3);
+ now+=1;await cache.get(fetcher);assert.equal(calls,4);
+});
+
 function okSnapshot(session = 50, weekly = 30): UsageSnapshot {
 	return {
 		provider: "claude",

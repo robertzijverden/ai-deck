@@ -10682,7 +10682,7 @@ async function getMeter(s, force = false) {
     let provider = providers.get(id);
     if (!provider) {
         // Account is the current official CLI login. Theme, thresholds and timers never split the cache.
-        const options = { cache: new UsageCache({ provider: id, ttlMs: 300000, forceMinIntervalMs: 60000 }) };
+        const options = { cache: new UsageCache({ provider: id, ttlMs: 300000, forceMinIntervalMs: 0 }) };
         provider = id === 'claude' ? new ClaudeProvider(options) : id === 'codex' ? new CodexProvider(options) : new CopilotProvider(options);
         providers.set(id, provider);
     }
@@ -10718,7 +10718,7 @@ class DeckAction extends SingletonAction {
         return; const old = this.instances.get(ev.action.id); if (old && (old.settings.service !== ev.payload.settings.service || old.settings.chatgptMode !== ev.payload.settings.chatgptMode || old.settings.source !== ev.payload.settings.source))
         old.meter = undefined; const r = this.runtime(ev.action, ev.payload.settings); await this.draw(r); if (this.mode === 'usage')
         this.poll(r); }
-    poll(r) { clearInterval(r.timer); void this.refresh(r); r.timer = setInterval(() => void this.refresh(r), number(r.settings.refreshSeconds, 300, 300, 3600) * 1000); }
+    poll(r) { clearInterval(r.timer); void this.refresh(r); r.timer = setInterval(() => void this.refresh(r), 300000); }
     async draw(r) { if (!r.active)
         return; await r.key.setTitle(''); await r.key.setImage(`data:image/svg+xml;base64,${Buffer.from(render(r.settings, this.mode, r.meter)).toString('base64')}`); }
     async refresh(r, force = false) { const generation = r.generation; try {
@@ -10812,7 +10812,7 @@ class DeckAction extends SingletonAction {
                     await ev.action.setSettings(s);
                 }
                 const meter = await getMeter(s, true);
-                await this.feedback(s.source === 'manual' ? 'Handmatige waarden actief. Kies Automatisch om verbruik te koppelen.' : !service(s).live ? 'Automatisch verbruik is voor deze dienst nog niet beschikbaar.' : !s.enabled ? 'Schakel Verbruik koppelen in om de verbinding te controleren.' : meter.session !== null || meter.weekly !== null ? meter.stale ? 'Eerdere gegevens beschikbaar; verversen wacht nog.' : 'Verbonden: verbruiksgegevens ontvangen.' : meter.status === 'auth_required' ? await login(s) : statusText(meter.status));
+                await this.feedback(s.source === 'manual' ? 'Handmatige waarden actief. Kies Automatisch om verbruik te koppelen.' : !service(s).live ? 'Automatisch verbruik is voor deze dienst nog niet beschikbaar.' : !s.enabled ? 'Schakel Verbruik koppelen in om de verbinding te controleren.' : meter.session !== null || meter.weekly !== null ? meter.stale ? 'Eerdere gegevens beschikbaar; verversen wacht nog.' : 'Gekoppeld.' : meter.status === 'auth_required' ? await login(s) : statusText(meter.status));
                 const r = this.instances.get(ev.action.id);
                 if (r) {
                     r.settings = s;
