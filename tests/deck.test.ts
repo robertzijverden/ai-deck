@@ -1,8 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { render, palette, serviceId, SERVICES, type Settings } from '../src/deck/model.ts';
+import { render, palette, service, serviceId, SERVICES, type Settings } from '../src/deck/model.ts';
 import { processName, psLiteral } from '../src/deck/platform.ts';
 import { getMeter } from '../src/deck/usage.ts';
+
+test('ChatGPT Work routes to the shared Codex provider while keeping ChatGPT app identity',async()=>{
+ const work={service:'chatgpt',chatgptMode:'work'};
+ assert.equal(service(work).live,service({service:'codex'}).live);
+ assert.equal(service(work).usage,SERVICES.codex.usage);
+ assert.equal(service(work).process,'ChatGPT');
+ assert.equal(serviceId(work),'chatgpt');
+ assert.equal(service(work).name,'ChatGPT Work');
+ assert.equal((await getMeter(work)).status,'disabled');
+ assert.equal((await getMeter({service:'chatgpt',chatgptMode:'chat',enabled:true})).status,'unsupported');
+ assert.equal(service({service:'chatgpt'}).live,'');
+ assert.match(render(work,'usage',{session:25,weekly:50}),/>ChatGPT Work</);
+});
 
 test('action marks are opt-in, including existing keys',()=>{
  assert.doesNotMatch(render({},'toggle'),/>↕</);

@@ -10,7 +10,7 @@ export const SERVICES = {
 } as const;
 export type ServiceId = keyof typeof SERVICES;
 export type Settings = {
-  service?: string; theme?: string; background?: string; foreground?: string; track?: string;
+  service?: string; chatgptMode?: string; theme?: string; background?: string; foreground?: string; track?: string;
   fill?: string; warningColor?: string; criticalColor?: string; thresholdColors?: boolean;
   warning?: number; critical?: number; layout?: string; iconStyle?: string; label?: string;
   showLabel?: boolean; showPercent?: boolean; showActionMark?: boolean; remaining?: boolean; window?: string;
@@ -18,7 +18,11 @@ export type Settings = {
   manualPercent?: number; manualWeekly?: number; refreshSeconds?: number;
   appPath?: string; processName?: string; prompt?: string; holdMs?: number; customIcon?: string;
 };
-export function service(s: Settings) { return SERVICES[serviceId(s)]; }
+export function service(s: Settings) {
+  const info=SERVICES[serviceId(s)];
+  return serviceId(s)==='chatgpt' && s.chatgptMode==='work'
+    ? {...info,name:'ChatGPT Work',live:'codex',usage:SERVICES.codex.usage} : info;
+}
 export function serviceId(s: Settings): ServiceId { return s.service && s.service in SERVICES ? s.service as ServiceId : 'claude'; }
 export function number(v: unknown, fallback: number, min: number, max: number) {
   return typeof v === 'number' && Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : fallback;

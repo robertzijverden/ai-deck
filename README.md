@@ -83,3 +83,6 @@ The implementation is in `src/deck/`; the upstream provider and regression-test 
 Usage connectors, caching and regression tests are derived from [Sing3Rous/stream-deck-ai-limits](https://github.com/Sing3Rous/stream-deck-ai-limits), copyright 2026 David Utyuganov, MIT. The original license is retained. New AI Deck controls and customization are by KeyPilot Labs. Brand SVG assets are from LobeHub Icons, MIT; trademarks remain with their respective owners.
 
 This is a Windows beta for direct testing. Elgato Marketplace approval has not been obtained. macOS support, direct consumer-app usage connections and additional provider-specific actions remain future work.
+
+### ChatGPT Work
+Select **ChatGPT** as the AI service, then **ChatGPT Work — gedeeld verbruik met Codex**. AI Deck automatically uses the existing Codex usage connection, cache, sign-in command and setup help. Click **Verbruik koppelen** once. This enables usage access and reuses the existing login; if authentication is required, it starts the appropriate sign-in flow. There is no separate enable checkbox. Results appear directly below the button. The key retains the ChatGPT logo and opens the ChatGPT app. Ordinary ChatGPT chat limits remain unsupported; existing ChatGPT keys keep their previous mode.

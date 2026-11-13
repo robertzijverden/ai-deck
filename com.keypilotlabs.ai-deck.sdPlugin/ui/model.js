@@ -13,7 +13,11 @@ var AiDeck = (function (exports) {
         microsoft: { name: 'Microsoft Copilot', short: 'MC', color: '#69baff', url: 'https://copilot.microsoft.com', chat: 'https://copilot.microsoft.com', usage: 'https://copilot.microsoft.com', process: 'Copilot', live: '' },
         github: { name: 'GitHub Copilot', short: 'GH', color: '#c5a3ff', url: 'https://github.com/copilot', chat: 'https://github.com/copilot', usage: 'https://github.com/settings/copilot', process: '', live: 'copilot' },
     };
-    function service(s) { return SERVICES[serviceId(s)]; }
+    function service(s) {
+        const info = SERVICES[serviceId(s)];
+        return serviceId(s) === 'chatgpt' && s.chatgptMode === 'work'
+            ? { ...info, name: 'ChatGPT Work', live: 'codex', usage: SERVICES.codex.usage } : info;
+    }
     function serviceId(s) { return s.service && s.service in SERVICES ? s.service : 'claude'; }
     function number(v, fallback, min, max) {
         return typeof v === 'number' && Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : fallback;

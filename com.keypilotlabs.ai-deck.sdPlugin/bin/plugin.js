@@ -9250,7 +9250,11 @@ const SERVICES = {
     microsoft: { name: 'Microsoft Copilot', short: 'MC', color: '#69baff', url: 'https://copilot.microsoft.com', chat: 'https://copilot.microsoft.com', usage: 'https://copilot.microsoft.com', process: 'Copilot', live: '' },
     github: { name: 'GitHub Copilot', short: 'GH', color: '#c5a3ff', url: 'https://github.com/copilot', chat: 'https://github.com/copilot', usage: 'https://github.com/settings/copilot', process: '', live: 'copilot' },
 };
-function service(s) { return SERVICES[serviceId(s)]; }
+function service(s) {
+    const info = SERVICES[serviceId(s)];
+    return serviceId(s) === 'chatgpt' && s.chatgptMode === 'work'
+        ? { ...info, name: 'ChatGPT Work', live: 'codex', usage: SERVICES.codex.usage } : info;
+}
 function serviceId(s) { return s.service && s.service in SERVICES ? s.service : 'claude'; }
 function number(v, fallback, min, max) {
     return typeof v === 'number' && Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : fallback;
@@ -9388,8 +9392,8 @@ async function copyPrompt(s) {
 }
 /** Launch only the official installed sign-in command. Never accept user shell commands. */
 async function login(s) {
-    const id = serviceId(s);
-    const commands = { claude: { exe: 'claude', args: ['auth', 'login'] }, codex: { exe: 'codex', args: ['login'] }, github: { exe: 'gh', args: ['auth', 'login', '--web', '--hostname', 'github.com'] } };
+    const id = service(s).live;
+    const commands = { claude: { exe: 'claude', args: ['auth', 'login'] }, codex: { exe: 'codex', args: ['login'] }, copilot: { exe: 'gh', args: ['auth', 'login', '--web', '--hostname', 'github.com'] } };
     const c = commands[id];
     if (!c)
         return 'Deze dienst gebruikt de aanmelding in je browser of app. Automatisch verbruik is nog niet beschikbaar.';
@@ -10711,7 +10715,7 @@ class DeckAction extends SingletonAction {
         this.instances.delete(ev.action.id);
     } }
     async onDidReceiveSettings(ev) { if (!ev.action.isKey())
-        return; const old = this.instances.get(ev.action.id); if (old && (old.settings.service !== ev.payload.settings.service || old.settings.source !== ev.payload.settings.source))
+        return; const old = this.instances.get(ev.action.id); if (old && (old.settings.service !== ev.payload.settings.service || old.settings.chatgptMode !== ev.payload.settings.chatgptMode || old.settings.source !== ev.payload.settings.source))
         old.meter = undefined; const r = this.runtime(ev.action, ev.payload.settings); await this.draw(r); if (this.mode === 'usage')
         this.poll(r); }
     poll(r) { clearInterval(r.timer); void this.refresh(r); r.timer = setInterval(() => void this.refresh(r), number(r.settings.refreshSeconds, 300, 300, 3600) * 1000); }
@@ -10787,14 +10791,31 @@ class DeckAction extends SingletonAction {
             if (command === 'login')
                 await this.feedback(await login(s));
             if (command === 'help') {
-                const urls = { claude: 'https://code.claude.com/docs/en/setup', codex: 'https://developers.openai.com/codex/cli', github: 'https://cli.github.com/' };
-                await streamDeck.system.openUrl(urls[serviceId(s)] ?? service(s).url);
+                const urls = { claude: 'https://code.claude.com/docs/en/setup', codex: 'https://developers.openai.com/codex/cli', copilot: 'https://cli.github.com/' };
+                await streamDeck.system.openUrl(urls[service(s).live] ?? service(s).url);
             }
-            if (command === 'check') {
-                const meter = await getMeter(s, true);
-                await this.feedback(!service(s).live ? 'Automatisch verbruik is voor deze dienst nog niet beschikbaar.' : !s.enabled ? 'Schakel Verbruik koppelen in om de verbinding te controleren.' : meter.session !== null || meter.weekly !== null ? meter.stale ? 'Eerdere gegevens beschikbaar; verversen wacht nog.' : 'Verbonden: verbruiksgegevens ontvangen.' : statusText(meter.status));
+            if (command === 'disconnect') {
+                s.enabled = false;
+                await ev.action.setSettings(s);
+                await this.feedback('Koppeling uitgeschakeld.');
                 const r = this.instances.get(ev.action.id);
                 if (r) {
+                    r.settings = s;
+                    r.meter = await getMeter(s);
+                    await this.draw(r);
+                }
+                return;
+            }
+            if (command === 'check') {
+                if (service(s).live && s.source !== 'manual') {
+                    s.enabled = true;
+                    await ev.action.setSettings(s);
+                }
+                const meter = await getMeter(s, true);
+                await this.feedback(s.source === 'manual' ? 'Handmatige waarden actief. Kies Automatisch om verbruik te koppelen.' : !service(s).live ? 'Automatisch verbruik is voor deze dienst nog niet beschikbaar.' : !s.enabled ? 'Schakel Verbruik koppelen in om de verbinding te controleren.' : meter.session !== null || meter.weekly !== null ? meter.stale ? 'Eerdere gegevens beschikbaar; verversen wacht nog.' : 'Verbonden: verbruiksgegevens ontvangen.' : meter.status === 'auth_required' ? await login(s) : statusText(meter.status));
+                const r = this.instances.get(ev.action.id);
+                if (r) {
+                    r.settings = s;
                     r.meter = meter;
                     await this.draw(r);
                 }

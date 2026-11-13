@@ -35,7 +35,7 @@ export async function copyPrompt(s: Settings) {
 }
 /** Launch only the official installed sign-in command. Never accept user shell commands. */
 export async function login(s: Settings): Promise<string> {
-  const id=serviceId(s); const commands: Record<string,{exe:string;args:string[]}>={claude:{exe:'claude',args:['auth','login']},codex:{exe:'codex',args:['login']},github:{exe:'gh',args:['auth','login','--web','--hostname','github.com']}};
+  const id=service(s).live; const commands: Record<string,{exe:string;args:string[]}>={claude:{exe:'claude',args:['auth','login']},codex:{exe:'codex',args:['login']},copilot:{exe:'gh',args:['auth','login','--web','--hostname','github.com']}};
   const c=commands[id]; if(!c) return 'Deze dienst gebruikt de aanmelding in je browser of app. Automatisch verbruik is nog niet beschikbaar.';
   const found=await ps(`$c=Get-Command ${psLiteral(c.exe)} -ErrorAction SilentlyContinue; if($c){'found'}`);
   if(!found.stdout.includes('found')) return `De officiële ${c.exe}-aanmeldtool is niet geïnstalleerd. Gebruik de knop Installatiehulp. De gewone appacties werken wel.`;

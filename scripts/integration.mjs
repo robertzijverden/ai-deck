@@ -7,7 +7,7 @@ const info={application:{version:'7.1.0',platform:'windows',platformVersion:'10'
 const child=spawn(process.execPath,['bin/plugin.js','-port',String(server.address().port),'-pluginUUID','test-plugin','-registerEvent','registerPlugin','-info',JSON.stringify(info)],{cwd:path.resolve('com.keypilotlabs.ai-deck.sdPlugin'),stdio:'pipe',windowsHide:true});
 let stderr='';child.stderr.on('data',d=>stderr+=d);const watchdog=setTimeout(()=>{console.error('Protocol test timeout',stderr);child.kill();server.close();process.exit(1);},12000);
 try{
-const ws=await new Promise(r=>server.once('connection',r));const messages=[];ws.on('message',d=>messages.push(JSON.parse(d)));
+const ws=await new Promise(r=>server.once('connection',r));const messages=[];ws.on('message',d=>{const m=JSON.parse(d);messages.push(m);if(m.event==='getSettings')ws.send(JSON.stringify({event:'didReceiveSettings',context:m.context,action:'com.keypilotlabs.ai-deck.usage',device:'test-device',payload:{settings:{service:'chatgpt',chatgptMode:'work',source:'manual',manualPercent:25,enabled:true},controller:'Keypad',coordinates:{row:0,column:0}}}));});
 const wait=async(predicate)=>{for(let i=0;i<100;i++){const found=messages.find(predicate);if(found)return found;await new Promise(r=>setTimeout(r,30));}throw Error('Expected message not received: '+stderr);};
 await wait(m=>m.event==='registerPlugin');
 const settings={service:'claude',source:'manual',manualPercent:57,manualWeekly:18};
@@ -21,6 +21,12 @@ event('willAppear','chat-key','newchat',{service:'gemini'});event('keyDown','cha
 await wait(m=>m.event==='openUrl'&&m.payload.url==='https://gemini.google.com/app');
 event('willAppear','unsupported','usage',{service:'grok',enabled:true});
 await wait(m=>m.event==='setImage'&&m.context==='unsupported'&&Buffer.from(m.payload.image.split(',')[1],'base64').toString().includes('Niet beschikbaar'));
+event('propertyInspectorDidAppear','usage-key','usage',settings);
+ws.send(JSON.stringify({event:'sendToPlugin',context:'usage-key',action:'com.keypilotlabs.ai-deck.usage',payload:{command:'check'}}));
+await wait(m=>m.event==='sendToPropertyInspector'&&m.payload.message.includes('Handmatige waarden actief'));
+ws.send(JSON.stringify({event:'sendToPlugin',context:'usage-key',action:'com.keypilotlabs.ai-deck.usage',payload:{command:'disconnect'}}));
+await wait(m=>m.event==='setSettings'&&m.payload.enabled===false);
+await wait(m=>m.event==='sendToPropertyInspector'&&m.payload.message==='Koppeling uitgeschakeld.');
 event('willDisappear','usage-key','usage',settings);
 console.log('PASS: registration, manual meter, settings redraw, new-chat action, unsupported-provider state, disappearance. No real credentials or browser actions used.');
 ws.close();
