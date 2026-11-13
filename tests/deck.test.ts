@@ -3,6 +3,20 @@ import assert from 'node:assert/strict';
 import { render, palette, serviceId, SERVICES, type Settings } from '../src/deck/model.ts';
 import { processName, psLiteral } from '../src/deck/platform.ts';
 import { getMeter } from '../src/deck/usage.ts';
+
+test('action marks are opt-in, including existing keys',()=>{
+ assert.doesNotMatch(render({},'toggle'),/>↕</);
+ assert.match(render({showActionMark:true},'toggle'),/>↕</);
+});
+test('ring percentages fit inside the ring with oversized saved settings',()=>{
+ for(const value of [0,10,57,100]) {
+  const svg=render({layout:'ring',fontSize:48},'usage',{session:value,weekly:0});
+  const match=svg.match(/font-size="([\d.]+)"[^>]*>\d+%<\/text>/)!;
+  assert.ok(Number(match[1])<=30);
+  if(value===100)assert.ok(Number(match[1])<=24);
+ }
+ assert.match(render({layout:'percent',fontSize:48},'usage',{session:100,weekly:0}),/font-size="48"[^>]*>100%</);
+});
 test('default theme stays monochrome even at 100 percent',()=>{const svg=render({},'usage',{session:100,weekly:95});assert.match(svg,/#ffffff/);assert.doesNotMatch(svg,/#ff5544|#ffcc00/);});
 test('theme colors, remaining usage and threshold overrides are independent',()=>{const s={fill:'#123abc',foreground:'#abcdef',remaining:true};const svg=render(s,'usage',{session:80,weekly:10});assert.match(svg,/>20%</);assert.match(svg,/#123abc/);assert.match(svg,/#abcdef/);assert.match(render({...s,thresholdColors:true},'usage',{session:95,weekly:10}),/#ff5544/);});
 test('all services and layouts render without NaN or executable user markup',()=>{for(const service of Object.keys(SERVICES))for(const layout of ['bars','bar','ring','percent']){const svg=render({service,layout,label:'<script>"&'},'usage',{session:57,weekly:null});assert.doesNotMatch(svg,/NaN|<script>/);assert.match(svg,/&lt;script&gt;/);}});

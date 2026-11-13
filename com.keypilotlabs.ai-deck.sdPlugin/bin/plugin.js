@@ -9301,7 +9301,8 @@ function render(s, action, meter) {
         if (s.showLabel !== false && style !== 'text')
             body += text(72, 124, label, label.length > 13 ? 12 : 16);
         const marks = { open: '↗', close: '×', toggle: '↕', newchat: '+', prompt: '≡', dashboard: '◷' };
-        body += text(129, 21, marks[action] ?? '', 18);
+        if (s.showActionMark === true)
+            body += text(129, 21, marks[action] ?? '', 18);
     }
     else if (!meter || (meter.status && meter.session === null && meter.weekly === null)) {
         body += text(72, 52, label, 17) + text(72, 85, statusText(meter?.status ?? 'loading'), 16);
@@ -9329,7 +9330,10 @@ function render(s, action, meter) {
             const value = val(raw), ink = paint(raw);
             if (layout === 'ring')
                 body += `<circle cx="72" cy="76" r="40" fill="none" stroke="${p.track}" stroke-width="10"/>` + (value !== null ? `<circle cx="72" cy="76" r="40" fill="none" stroke="${ink}" stroke-width="10" stroke-dasharray="${251.327 * value / 100} 251.327" transform="rotate(-90 72 76)"/>` : '');
-            body += text(72, 86, value === null ? '—' : `${value}%`, number(s.fontSize, 32, 18, 48), 'middle', ink);
+            const percentage = value === null ? '—' : `${value}%`;
+            // Leave space inside the ring even for 100% and older oversized settings.
+            const size = layout === 'ring' ? Math.min(number(s.fontSize, 24, 18, 32), percentage.length > 3 ? 24 : 30) : number(s.fontSize, 32, 18, 48);
+            body += text(72, layout === 'ring' ? 76 + size * 0.35 : 86, percentage, size, 'middle', ink);
             if (layout === 'percent')
                 body += text(72, 109, weekly ? 'Week' : id === 'github' ? 'Maand' : '5 uur', 16);
         }
